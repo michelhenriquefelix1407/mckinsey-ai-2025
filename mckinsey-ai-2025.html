@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estado da IA em 2025 — McKinsey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --gold: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(0,212,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(124,58,237,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(245,158,11,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.25);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 7vw, 42px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    background: linear-gradient(135deg, #ffffff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .subtitle strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0;
+    opacity: 0.3;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--accent);
+  }
+  .divider span { font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .card:hover { border-color: rgba(0,212,255,0.2); transform: translateY(-1px); }
+  .card.open { border-color: rgba(0,212,255,0.3); }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.15s; }
+  .card:nth-child(3) { animation-delay: 0.2s; }
+  .card:nth-child(4) { animation-delay: 0.25s; }
+  .card:nth-child(5) { animation-delay: 0.3s; }
+  .card:nth-child(6) { animation-delay: 0.35s; }
+  .card:nth-child(7) { animation-delay: 0.4s; }
+  .card:nth-child(8) { animation-delay: 0.45s; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .card-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .card-title {
+    flex: 1;
+  }
+
+  .card-title h3 {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .card-title .stat {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .card-arrow {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s, background 0.2s;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .card.open .card-arrow {
+    transform: rotate(180deg);
+    background: rgba(0,212,255,0.1);
+    color: var(--accent);
+  }
+
+  /* Body */
+  .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .card.open .card-body { max-height: 1200px; }
+
+  .card-inner {
+    padding: 0 22px 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .card-inner p {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #b8c5d6;
+    margin-bottom: 14px;
+  }
+
+  .card-inner p:last-child { margin-bottom: 0; }
+
+  /* Stat blocks */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .stat-box {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .stat-box .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-box .label {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* Highlight */
+  .highlight {
+    background: rgba(0,212,255,0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    margin: 14px 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .highlight strong { color: var(--accent); }
+
+  /* Tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .tag {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Color variants */
+  .c1 .card-num { background: rgba(0,212,255,0.12); color: var(--accent); }
+  .c2 .card-num { background: rgba(124,58,237,0.15); color: #a78bfa; }
+  .c3 .card-num { background: rgba(245,158,11,0.12); color: var(--gold); }
+  .c4 .card-num { background: rgba(16,185,129,0.12); color: #34d399; }
+  .c5 .card-num { background: rgba(239,68,68,0.12); color: #f87171; }
+  .c6 .card-num { background: rgba(59,130,246,0.12); color: #60a5fa; }
+  .c7 .card-num { background: rgba(236,72,153,0.12); color: #f472b6; }
+  .c8 .card-num { background: rgba(245,158,11,0.12); color: var(--gold); }
+
+  .c1 .num { color: var(--accent); }
+  .c2 .num { color: #a78bfa; }
+  .c3 .num { color: var(--gold); }
+  .c4 .num { color: #34d399; }
+  .c5 .num { color: #f87171; }
+  .c6 .num { color: #60a5fa; }
+  .c7 .num { color: #f472b6; }
+  .c8 .num { color: var(--gold); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .footer strong { color: #64748b; }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="badge">McKinsey · QuantumBlack · Nov 2025</div>
+    <h1>Estado da IA<br>em 2025</h1>
+    <p class="subtitle">
+      Resumo do relatório <strong>The State of AI in 2025</strong><br>
+      Agentes, inovação e transformação — 1.993 executivos em 105 países<br><br>
+      <span style="color:#64748b">▼ Toque em cada tópico para se aprofundar</span>
+    </p>
+  </div>
+
+  <div class="divider"><span>8 achados principais</span></div>
+
+  <!-- Card 1 -->
+  <div class="card c1" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">01</div>
+      <div class="card-title">
+        <h3>Adoção ampla, mas maioria ainda em fase piloto</h3>
+        <div class="stat">88% usam IA · só 1/3 está escalando</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>88% das organizações já usam IA em pelo menos uma função de negócios — um salto considerável em relação aos 78% do ano anterior. No entanto, a profundidade dessa adoção ainda é rasa.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">88%</div><div class="label">usam IA em alguma função</div></div>
+          <div class="stat-box"><div class="num">32%</div><div class="label">ainda em fase experimental</div></div>
+          <div class="stat-box"><div class="num">7%</div><div class="label">totalmente escaladas</div></div>
+        </div>
+        <p>Aproximadamente <strong>30% estão em fase piloto</strong> (testando o primeiro caso de uso) e <strong>31% em scaling</strong> (expandindo dentro da organização). Apenas 7% consideram a IA totalmente integrada.</p>
+        <div class="highlight">
+          <strong>O que isso significa:</strong> A maioria das empresas usa IA como ferramenta pontual — não como vantagem estratégica integrada. Há uma lacuna enorme entre "usar IA" e "transformar o negócio com IA".
+        </div>
+        <div class="tags">
+          <span class="tag">Adoção</span><span class="tag">Escala</span><span class="tag">Maturidade</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card c2" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">02</div>
+      <div class="card-title">
+        <h3>Agentes de IA: muito buzz, pouca escala</h3>
+        <div class="stat">62% experimentam · 23% escalando</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Agentes de IA são sistemas baseados em modelos de fundação capazes de agir no mundo real, planejando e executando múltiplos passos de forma autônoma. O interesse é enorme — mas a realidade operacional ainda é limitada.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">62%</div><div class="label">experimentando agentes</div></div>
+          <div class="stat-box"><div class="num">23%</div><div class="label">escalando em ao menos 1 função</div></div>
+          <div class="stat-box"><div class="num">&lt;10%</div><div class="label">escala em qualquer função específica</div></div>
+        </div>
+        <p>Os setores com maior adoção de agentes são <strong>tecnologia, mídia & telecom e saúde</strong>. As funções mais avançadas são <strong>TI</strong> (service desk) e <strong>gestão do conhecimento</strong> (pesquisa profunda).</p>
+        <div class="highlight">
+          <strong>Atenção:</strong> A maioria que está escalando agentes faz isso em apenas 1 ou 2 funções. A narrativa de "agentes tomando conta de tudo" está muito à frente da realidade atual.
+        </div>
+        <div class="tags">
+          <span class="tag">Agentes IA</span><span class="tag">Automação</span><span class="tag">Agentic AI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3 -->
+  <div class="card c3" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">03</div>
+      <div class="card-title">
+        <h3>Impacto financeiro ainda é limitado</h3>
+        <div class="stat">só 39% reportam impacto no EBIT</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Apesar de toda a efervescência em torno da IA, o impacto financeiro no nível corporativo ainda é modesto. A maioria dos benefícios está concentrada em casos de uso específicos, não no resultado global da empresa.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">39%</div><div class="label">reportam qualquer impacto no EBIT</div></div>
+          <div class="stat-box"><div class="num">64%</div><div class="label">dizem que IA melhorou inovação</div></div>
+          <div class="stat-box"><div class="num">45%</div><div class="label">reportam melhora na satisfação do cliente</div></div>
+        </div>
+        <p>Os maiores benefícios de <strong>redução de custos</strong> aparecem em engenharia de software, manufatura e TI. Já os maiores ganhos de <strong>receita</strong> vêm de marketing & vendas, estratégia e desenvolvimento de produtos.</p>
+        <div class="highlight">
+          <strong>Insight:</strong> A IA já está gerando valor qualitativo claro (inovação, satisfação, diferenciação), mas ainda não se traduz em resultado financeiro consolidado para a maioria das empresas.
+        </div>
+        <div class="tags">
+          <span class="tag">EBIT</span><span class="tag">ROI</span><span class="tag">Redução de Custos</span><span class="tag">Receita</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4 -->
+  <div class="card c4" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">04</div>
+      <div class="card-title">
+        <h3>Grandes empresas lideram a escala</h3>
+        <div class="stat">50% das empresas +$5B já estão escalando</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Existe uma correlação clara entre o tamanho da empresa e a maturidade na adoção de IA. Empresas maiores têm mais recursos, mais dados e mais capacidade de absorver os custos iniciais de implementação.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">~50%</div><div class="label">empresas +$5B em escala</div></div>
+          <div class="stat-box"><div class="num">29%</div><div class="label">empresas &lt;$100M em escala</div></div>
+        </div>
+        <p>Empresas menores ficam presas em pilotos por falta de infraestrutura de dados, talento técnico escasso e dificuldade de justificar investimentos maiores sem resultados imediatos claros.</p>
+        <div class="highlight">
+          <strong>Para PMEs:</strong> A boa notícia é que as ferramentas estão se tornando mais acessíveis. O caminho para pequenas empresas é focar em 1 caso de uso de alto impacto antes de pensar em escala.
+        </div>
+        <div class="tags">
+          <span class="tag">PME</span><span class="tag">Enterprise</span><span class="tag">Escala</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 5 -->
+  <div class="card c5" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">05</div>
+      <div class="card-title">
+        <h3>Alto desempenho exige ambição transformadora</h3>
+        <div class="stat">high performers: 3,6x mais propensos a transformar</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Os <em>"AI high performers"</em> — apenas 6% dos respondentes — são definidos como aqueles que atribuem mais de 5% do EBIT à IA e reportam "valor significativo". O que os diferencia não é a tecnologia — é a mentalidade.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">3.6×</div><div class="label">mais propensos a buscar transformação total</div></div>
+          <div class="stat-box"><div class="num">2.8×</div><div class="label">mais propensos a redesenhar workflows</div></div>
+          <div class="stat-box"><div class="num">3×</div><div class="label">mais líderes ativamente engajados</div></div>
+        </div>
+        <p>Eles também têm objetivos mais amplos: 82% buscam <strong>crescimento</strong> como objetivo de IA (vs. 50% dos demais) e 79% buscam <strong>inovação</strong> (vs. 50%). Todos buscam eficiência — mas só os melhores vão além.</p>
+        <div class="highlight">
+          <strong>Lição central:</strong> Usar IA só para cortar custos é a abordagem da maioria — e produz resultados medianos. Os que mais ganham usam IA para <strong>crescer, inovar e transformar</strong>.
+        </div>
+        <div class="tags">
+          <span class="tag">High Performers</span><span class="tag">Transformação</span><span class="tag">Ambição</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 6 -->
+  <div class="card c6" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">06</div>
+      <div class="card-title">
+        <h3>As práticas que separam líderes de seguidores</h3>
+        <div class="stat">6 dimensões do framework Rewired da McKinsey</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>A pesquisa identificou as práticas com maior correlação com alto desempenho em IA, através de análise de 31 variáveis. Elas se agrupam em 6 dimensões do framework <strong>Rewired</strong> da McKinsey.</p>
+        <div class="highlight"><strong>🏆 Práticas de maior prevalência entre high performers:</strong></div>
+        <p><strong>1. Human in the loop</strong> — processos definidos para quando validação humana é necessária (65% dos high performers vs. 23% dos demais)</p>
+        <p><strong>2. Infraestrutura tecnológica</strong> — arquitetura que permite implementar as tecnologias mais recentes (60% vs. 23%)</p>
+        <p><strong>3. Roadmap claro de IA</strong> — casos de uso definidos alinhados à estratégia geral (60% vs. 31%)</p>
+        <p><strong>4. Liderança alinhada em criação de valor</strong> — líderes entendem como IA gera valor (60% vs. 41%)</p>
+        <p><strong>5. Redesenho de processos</strong> — IA embebida nos fluxos de trabalho reais (58% vs. 20%)</p>
+        <p><strong>6. Engajamento sênior</strong> — líderes modelam o uso de IA ativamente (57% vs. 33%)</p>
+        <div class="tags">
+          <span class="tag">Governança</span><span class="tag">Talento</span><span class="tag">Dados</span><span class="tag">Estratégia</span><span class="tag">Rewired</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 7 -->
+  <div class="card c7" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">07</div>
+      <div class="card-title">
+        <h3>Impacto no workforce: incerto, mas crescente</h3>
+        <div class="stat">32% esperam redução · 43% esperam nenhuma mudança</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>A questão do emprego é a mais sensível politicamente — e os dados mostram que as expectativas superam a realidade atual. O impacto real no headcount até agora é menor do que o esperado.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">17%</div><div class="label">reportaram redução no ano passado (mediana por função)</div></div>
+          <div class="stat-box"><div class="num">30%</div><div class="label">esperam redução no próximo ano</div></div>
+        </div>
+        <p>Ao mesmo tempo, empresas maiores continuam <strong>contratando para funções de IA</strong>. Os perfis mais demandados: cientistas de dados, engenheiros de dados, engenheiros de ML e engenheiros de software.</p>
+        <div class="highlight">
+          <strong>Paradoxo:</strong> A IA está eliminando algumas funções ao mesmo tempo que cria novas. Empresas com +$1B em receita têm 2x mais probabilidade de contratar funções que integram, modelam e industrializam dados.
+        </div>
+        <div class="tags">
+          <span class="tag">Empregos</span><span class="tag">Workforce</span><span class="tag">Upskilling</span><span class="tag">Contratação</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 8 -->
+  <div class="card c8" onclick="toggle(this)">
+    <div class="card-header">
+      <div class="card-num">08</div>
+      <div class="card-title">
+        <h3>Riscos de IA: mais comuns, mais gerenciados</h3>
+        <div class="stat">51% tiveram ao menos 1 consequência negativa</div>
+      </div>
+      <div class="card-arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>À medida que o uso de IA se aprofunda, os riscos também se materializam com mais frequência. A boa notícia: as organizações estão ficando melhores em gerenciá-los.</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num">51%</div><div class="label">sofreram ao menos 1 consequência negativa</div></div>
+          <div class="stat-box"><div class="num">30%</div><div class="label">sofreram consequências de imprecisão</div></div>
+          <div class="stat-box"><div class="num">4</div><div class="label">riscos gerenciados em média (vs. 2 em 2022)</div></div>
+        </div>
+        <p>Os riscos mais mitigados: <strong>imprecisão</strong> (54% gerenciam) e <strong>cibersegurança</strong> (51%). Uma lacuna preocupante: <strong>explicabilidade</strong> é o 2º risco mais vivenciado (14%), mas está longe de ser o mais mitigado.</p>
+        <div class="highlight">
+          <strong>Insight importante:</strong> Os high performers reportam <em>mais</em> consequências negativas — não menos. Isso porque usam IA em contextos mais críticos e monitoram com mais rigor. Ambição implica exposição gerenciada.
+        </div>
+        <div class="tags">
+          <span class="tag">Risco</span><span class="tag">Compliance</span><span class="tag">Privacidade</span><span class="tag">Imprecisão</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Fonte: <strong>McKinsey Global Survey on the State of AI, 2025</strong><br>
+    1.993 participantes · 105 países · Junho–Julho 2025<br><br>
+    <span style="color:#334155">Resumo gerado com Claude · Anthropic</span></p>
+  </div>
+
+</div>
+
+<script>
+  function toggle(card) {
+    const isOpen = card.classList.contains('open');
+    document.querySelectorAll('.card.open').forEach(c => c.classList.remove('open'));
+    if (!isOpen) card.classList.add('open');
+  }
+</script>
+</body>
+</html>
